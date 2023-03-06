@@ -1,23 +1,25 @@
 <template>
-  <div>
+  <section>
     <ul>
       <li
         v-for="(todoItem, index) in todoItems"
-        v-bind:key="todoItem"
         class="shadow"
+        v-bind:key="todoItem.item"
       >
-        {{ todoItem }}
-        <span class="removeBtn" @click="removeTodo(todoItem, index)">
-          <i class="fas fa-trash-alt"></i>
+        <i
+          class="checkBtn fas fa-check"
+          v-bind:class="{ checkBtnCompleted: todoItem.completed }"
+          v-on:click="toggleComplete(todoItem, index)"
+        ></i>
+        <span v-bind:class="{ textCompleted: todoItem.completed }">{{
+          todoItem.item
+        }}</span>
+        <span class="removeBtn" v-on:click="removeTodo(todoItem, index)">
+          <i class="removeBtn fas fa-trash-alt"></i>
         </span>
       </li>
-
-      <!-- <li>hi</li>
-      <li>hello</li>
-      <li>bye</li>
-      <li>ddd</li> -->
     </ul>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -29,18 +31,22 @@ export default {
   },
   methods: {
     removeTodo: function (todoItem, index) {
-      console.log(todoItem, index);
-      localStorage.removeItem(todoItem); //로컬 삭제
-      this.todoItems.splice(index, 1); // 화면상에서 삭제
+      this.todoItems.splice(index, 1);
+      localStorage.removeItem(todoItem);
+    },
+    toggleComplete: function (todoItem) {
+      todoItem.completed = !todoItem.completed;
+      localStorage.removeItem(todoItem.item);
+      localStorage.setItem(todoItem.item, JSON.stringify(todoItem));
     },
   },
   created: function () {
-    console.log("created");
     if (localStorage.length > 0) {
       for (var i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) !== "loglevel:webpack-dev-server") {
-          this.todoItems.push(localStorage.key(i));
-          console.log(localStorage.key(i));
+          this.todoItems.push(
+            JSON.parse(localStorage.getItem(localStorage.key(i)))
+          );
         }
       }
     }
@@ -48,7 +54,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 ul {
   list-style-type: none;
   padding-left: 0px;
@@ -59,6 +65,7 @@ li {
   display: flex;
   min-height: 50px;
   height: 50px;
+  line-height: 50px;
   margin: 0.5rem 0;
   padding: 0 0.9rem;
   background: white;
@@ -66,17 +73,18 @@ li {
 }
 .checkBtn {
   line-height: 45px;
+  /* color: black; */
   color: #62acde;
   margin-right: 5px;
 }
 .checkBtnCompleted {
-  color: #b3adad;
+  /* color: #62acde; */
+  color: black;
 }
 .textCompleted {
   text-decoration: line-through;
-  color: #b3adad;
 }
-.removeBttn {
+.removeBtn {
   margin-left: auto;
   color: #de4343;
 }
